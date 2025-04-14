@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Coin Flip Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg-light: linear-gradient(to right, #bf74eb, #0c1ff4);
+      --bg-dark: linear-gradient(to right, #000000, #fbfdff);
+      --text-light: #000;
+      --text-dark: #fff;
+      --button-bg: #00796b;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-light);
+      font-family: 'Segoe UI', sans-serif;
+      color: var(--text-light);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: background 0.5s, color 0.5s;
+    }
+
+    body.dark {
+      background: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    .navbar {
+      background-color: rgba(0, 0, 0, 0.3);
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .navbar .links a, .theme-toggle {
+      color: white;
+      margin-left: 20px;
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .container {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .game {
+      text-align: center;
+    }
+
+    .coin {
+      width: 150px;
+      height: 150px;
+      margin: 20px auto;
+      perspective: 1000px;
+    }
+
+    .coin-inner {
+      width: 100%;
+      height: 100%;
+      transition: transform 1s ease-in-out;
+      transform-style: preserve-3d;
+      position: relative;
+    }
+
+    .head, .tail {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background-size: cover;
+      background-position: center;
+      backface-visibility: hidden;
+    }
+
+    .head {
+      background-image: url('https://upload.wikimedia.org/wikipedia/commons/5/5c/Kennedy_Half_Dollar_Obverse_1974.png');
+    }
+
+    .tail {
+      background-image: url('https://upload.wikimedia.org/wikipedia/commons/1/1e/US_Half_Dollar_Rev.png');
+      transform: rotateY(180deg);
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: var(--button-bg);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+
+
+    #result, #score {
+      font-size: 20px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .navbar .links {
+        margin-top: 10px;
+      }
+
+      .coin {
+        width: 120px;
+        height: 120px;
+      }
+
+      button {
+        width: 100%;
+        max-width: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <div class="navbar">
+    <h1>Coin Flip Game</h1>
+    <div class="links">
+      <a href="index.html">Home</a>
+      <a href="app.html">app</a>
+      <a href="my favourites.html">Favourites</a>
+      <a href="food.html">famous food </a>
+      <a href="sign in page.html">sign in</a>
+      <a href="my work .html">work</a>
+      <a href="my birthday.html">my birthday</a>
+    
+      <span class="theme-toggle" onclick="toggleTheme()">🌙 Theme</span>
+    </div>
+  </div>
+
+  <!-- Game Area -->
+  <div class="container">
+    <div class="game">
+      <div class="coin">
+        <div class="coin-inner" id="coin">
+          <div class="head"></div>
+          <div class="tail"></div>
+        </div>
+      </div>
+      <button onclick="flipCoin()">Flip Coin</button>
+      <button onclick="resetGame()">Reset</button>
+      <p id="result">🪙 Flip the coin!</p>
+      <p id="score">Heads: 0 | Tails: 0</p>
+    </div>
+  </div>
+
+  <!-- Sound Effect -->
+  <audio id="flipSound" src="https://www.soundjay.com/button/sounds/button-16.mp3" preload="auto"></audio>
+
+  <script>
+    const coin = document.getElementById('coin');
+    const result = document.getElementById('result');
+    const score = document.getElementById('score');
+    const flipSound = document.getElementById('flipSound');
+
+    let headsCount = parseInt(localStorage.getItem('heads')) || 0;
+    let tailsCount = parseInt(localStorage.getItem('tails')) || 0;
+    let flipping = false;
+
+    updateScore();
+
+    function flipCoin() {
+      if (flipping) return;
+      flipping = true;
+
+      const isHeads = Math.random() < 0.5;
+
+      flipSound.currentTime = 0;
+      flipSound.play();
+
+      let rotateY = 1800 + Math.floor(Math.random() * 360);
+      if (!isHeads) rotateY += 180;
+
+      coin.style.transform = `rotateY(${rotateY}deg)`;
+
+      setTimeout(() => {
+        if (isHeads) {
+          headsCount++;
+          result.textContent = "🪙 It's Heads!";
+        } else {
+          tailsCount++;
+          result.textContent = "🪙 It's Tails!";
+        }
+        localStorage.setItem('heads', headsCount);
+        localStorage.setItem('tails', tailsCount);
+        updateScore();
+        flipping = false;
+      }, 1000);
+    }
+
+    function updateScore() {
+      score.textContent = `Heads: ${headsCount} | Tails: ${tailsCount}`;
+    }
+
+    function resetGame() {
+      headsCount = 0;
+      tailsCount = 0;
+      localStorage.setItem('heads', 0);
+      localStorage.setItem('tails', 0);
+      result.textContent = "🪙 Flip the coin!";
+      updateScore();
+      coin.style.transform = "rotateY(0deg)";
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark');
+    }
+  </script>
+</body>
+</html>
